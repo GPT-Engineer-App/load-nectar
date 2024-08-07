@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Paw, Star, Facebook, Twitter, Instagram, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { Cat, Heart, Info, Paw, Star, Facebook, Twitter, Instagram, ArrowRight, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const catBreeds = [
   { name: "Siamese", description: "Vocal and social cats known for their distinctive coloring.", image: "https://upload.wikimedia.org/wikipedia/commons/2/25/Siam_lilacpoint.jpg", personality: "Talkative, intelligent, and affectionate" },
@@ -56,6 +57,12 @@ const Index = () => {
   const [matchedBreed, setMatchedBreed] = useState(null);
   const [quizProgress, setQuizProgress] = useState(0);
   const { toast } = useToast();
+
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.8]);
+
+  const breedsRef = useRef(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -116,9 +123,13 @@ const Index = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 1.5 }}
       >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <motion.div 
+          className="absolute inset-0 bg-black"
+          style={{ opacity }}
+        ></motion.div>
         <motion.div
           className="text-center z-10"
+          style={{ scale }}
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 1 }}
@@ -136,15 +147,23 @@ const Index = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+            <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => breedsRef.current.scrollIntoView({ behavior: 'smooth' })}>
               Explore Now <ArrowRight className="ml-2" />
             </Button>
           </motion.div>
+        </motion.div>
+        <motion.div 
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          <ChevronDown className="text-white" size={32} />
         </motion.div>
       </motion.div>
       
       <div className="max-w-6xl mx-auto p-8">
         <motion.div
+          ref={breedsRef}
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -165,11 +184,16 @@ const Index = () => {
                           alt={breed.name}
                           className="mx-auto object-cover w-full h-[300px]"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
+                        <motion.div 
+                          className="absolute inset-0 bg-gradient-to-t from-black to-transparent flex flex-col justify-end p-4 text-white"
+                          initial={{ opacity: 0 }}
+                          whileHover={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                        >
                           <CardTitle className="text-2xl mb-2">{breed.name}</CardTitle>
                           <CardDescription className="text-gray-200 mb-2">{breed.description}</CardDescription>
                           <p className="text-sm">{breed.personality}</p>
-                        </div>
+                        </motion.div>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -199,26 +223,34 @@ const Index = () => {
                   <CardDescription>Discover what makes cats unique</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-4">
-                    {[
-                      "Excellent hunters with sharp claws and teeth",
-                      "Flexible bodies and quick reflexes",
-                      "Keen senses, especially hearing and night vision",
-                      "Communicate through vocalizations, body language, and scent"
-                    ].map((feature, index) => (
-                      <motion.li 
-                        key={index}
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        whileHover={{ scale: 1.05 }} 
-                        className="flex items-center p-4 bg-purple-100 rounded-lg shadow-md"
-                      >
-                        <Paw className="mr-4 text-purple-500" size={24} />
-                        <span className="text-lg">{feature}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
+                  <ScrollArea className="h-[400px] w-full pr-4">
+                    <ul className="space-y-4">
+                      {[
+                        "Excellent hunters with sharp claws and teeth",
+                        "Flexible bodies and quick reflexes",
+                        "Keen senses, especially hearing and night vision",
+                        "Communicate through vocalizations, body language, and scent",
+                        "Independent nature balanced with affectionate behavior",
+                        "Retractable claws for climbing and hunting",
+                        "Excellent balance and agility",
+                        "Self-grooming behavior keeps their coat clean",
+                        "Whiskers help navigate through tight spaces",
+                        "Purring can indicate contentment or self-soothing"
+                      ].map((feature, index) => (
+                        <motion.li 
+                          key={index}
+                          initial={{ opacity: 0, x: -50 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ scale: 1.05 }} 
+                          className="flex items-center p-4 bg-purple-100 rounded-lg shadow-md"
+                        >
+                          <Paw className="mr-4 text-purple-500" size={24} />
+                          <span className="text-lg">{feature}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -351,7 +383,7 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-purple-100 to-pink-100">
+          <Card className="bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden">
             <CardHeader>
               <CardTitle className="flex items-center text-3xl font-bold">
                 <Info className="mr-2 text-purple-500" size={28} /> Did You Know?
@@ -365,19 +397,27 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.5 }}
-                  className="bg-white p-6 rounded-lg shadow-md mb-6"
+                  className="bg-white p-6 rounded-lg shadow-md mb-6 relative"
                 >
+                  <motion.div
+                    className="absolute -top-2 -left-2 bg-yellow-400 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center font-bold"
+                    initial={{ rotate: 0 }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {currentFactIndex + 1}
+                  </motion.div>
                   <p className="text-xl text-gray-800 italic">"{catFacts[currentFactIndex]}"</p>
                 </motion.div>
               </AnimatePresence>
               <div className="flex justify-center space-x-4">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button onClick={handleLike} variant="outline" size="lg" className="flex items-center">
+                  <Button onClick={handleLike} variant="outline" size="lg" className="flex items-center bg-white">
                     <Heart className="mr-2 text-red-500" /> Love This Fact ({likes})
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button variant="outline" size="lg" className="flex items-center" onClick={() => setCurrentFactIndex((prevIndex) => (prevIndex + 1) % catFacts.length)}>
+                  <Button variant="outline" size="lg" className="flex items-center bg-white" onClick={() => setCurrentFactIndex((prevIndex) => (prevIndex + 1) % catFacts.length)}>
                     <Star className="mr-2 text-yellow-500" /> Next Fact
                   </Button>
                 </motion.div>
